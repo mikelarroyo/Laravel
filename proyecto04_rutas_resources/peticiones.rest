@@ -1,0 +1,31 @@
+GET http://127.0.0.1:8000/api/products
+Accept: application/json
+###
+
+POST http://127.0.0.1:8000/api/products
+Content-Type: application/json
+Accept: application/json
+
+{
+  "nombre": "Bicicleta estática",
+  "descripcion": "Bicicleta para entrenamiento cardiovascular en casa",
+  "precio": 299.99
+}
+###
+
+
+GET http://127.0.0.1:8000/api/products/6
+Accept: application/json
+###
+
+PUT http://127.0.0.1:8000/api/products/1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "precio": 279.99
+}
+###
+
+DELETE http://127.0.0.1:8000/api/products/8
+Accept: application/json
