@@ -1,8 +1,10 @@
 GET http://127.0.0.1:8000/api/products
+Authorization: Bearer 1|El0stuxdOyR5ZpW9rjhzCR0y2kNWWEN8UrGBegnE8368cf29
 Accept: application/json
 ###
 
 POST http://127.0.0.1:8000/api/products
+Authorization: Bearer 1|El0stuxdOyR5ZpW9rjhzCR0y2kNWWEN8UrGBegnE8368cf29
 Content-Type: application/json
 Accept: application/json
 
@@ -14,11 +16,13 @@ Accept: application/json
 ###
 
 
-GET http://127.0.0.1:8000/api/products/6
+GET http://127.0.0.1:8000/api/products/17
+Authorization: Bearer 1|El0stuxdOyR5ZpW9rjhzCR0y2kNWWEN8UrGBegnE8368cf29
 Accept: application/json
 ###
 
-PUT http://127.0.0.1:8000/api/products/1
+PUT http://127.0.0.1:8000/api/products/17
+Authorization: Bearer 1|El0stuxdOyR5ZpW9rjhzCR0y2kNWWEN8UrGBegnE8368cf29
 Content-Type: application/json
 Accept: application/json
 
@@ -27,5 +31,34 @@ Accept: application/json
 }
 ###
 
-DELETE http://127.0.0.1:8000/api/products/8
+DELETE http://127.0.0.1:8000/api/products/4
+Authorization: Bearer 1|El0stuxdOyR5ZpW9rjhzCR0y2kNWWEN8UrGBegnE8368cf29
 Accept: application/json
+
+###
+
+POST http://127.0.0.1:8000/api/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email":"mikel@prueba2.es",
+    "password":"mikelito123"
+}
+
+###
+POST http://127.0.0.1:8000/api/logout
+Accept: application/json
+Authorization: Bearer 17|fSfhrdrueFXXjDbiZvDD13QSyxZoB62ET6mdJ4yYe137ac13
+
+###
+POST http://127.0.0.1:8000/api/register
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Mikel Arroyo",
+    "email": "mikel@prueba4.es",
+    "password": "mikelito123"
+}
+
