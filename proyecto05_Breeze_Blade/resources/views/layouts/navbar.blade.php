@@ -1,22 +1,87 @@
-<nav class="bg-[#2eab4f] text-white p-4 shadow-md">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Prieto Eats Navbar</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-        <div class="flex items-center gap-2">
-            <img src="{{ asset('logo.png') }}" alt="Logo" class="h-10 w-auto">
-            <span class="text-xl font-bold">Prieto Eats</span>
-        </div>
+  <style>
+    /* Estilos CSS (puedes poner esto en tu archivo .css) */
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
 
-        <div class="flex gap-6 text-sm items-center">
-            <a href="#" class="flex items-center gap-1">
-                <span class="material-icons text-base">email</span> Contacto
-            </a>
-            <a href="#" class="flex items-center gap-1">
-                <span class="material-icons text-base">login</span> Login
-            </a>
-            <a href="#" class="flex items-center gap-1">
-                <span class="material-icons text-base">person_add</span> Registrarse
-            </a>
-        </div>
+    .navbar {
+      background-color: #28a745; /* El color verde de tu barra */
+      display: flex;
+      justify-content: space-between; /* Separa el logo de las opciones */
+      align-items: center;
+      padding: 15px 40px;
+      color: white;
+    }
 
-    </div>
-</nav>
+    .logo-container {
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .logo-img {
+       height: 40px; /* Ajusta esto al tamaño de tu logo real */
+       margin-right: 10px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px; /* Espacio entre cada opción */
+    }
+
+    .nav-item {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      transition: opacity 0.3s;
+    }
+
+    .nav-item:hover {
+      opacity: 0.8; /* Un pequeño efecto al pasar el mouse */
+    }
+
+    /* Espacio entre el icono y el texto */
+    .nav-item i {
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+
+    <div class="logo-container">
+    <img src="{{ asset('img/logo.png') }}" alt="Logo Prieto Eats" class="logo-img">
+    <span>Prieto Eats</span>
+</div>
+
+   <div class="nav-links">
+
+    <a href="#" class="nav-item">
+        <i class="fas fa-envelope"></i> Contacto
+    </a>
+
+    <a href="{{ route('login') }}" class="nav-item">
+        <i class="fas fa-sign-in-alt"></i> Login
+    </a>
+
+    <a href="{{ route('register') }}" class="nav-item">
+        <i class="fas fa-user-plus"></i> Registrarse
+    </a>
+
+</div>
+  </nav>
+  </body>
+</html>

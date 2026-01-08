@@ -1,9 +1,7 @@
-<footer class="bg-[#2eab4f] text-white py-6 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="border-t border-green-700 pt-4 text-center">
-            <p class="text-sm font-medium">
-                Prieto Eats. Realizado por alumnado 2º Desarrollo de Aplicaciones Web
-            </p>
-        </div>
+<footer class="bg-white border-t border-gray-200 mt-auto">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <p class="text-center text-sm text-gray-500">
+            &copy; {{ date('Y') }} <span class="text-[#2eab4f] font-bold">Prieto Eats</span>. Todos los derechos reservados.
+        </p>
     </div>
 </footer>
