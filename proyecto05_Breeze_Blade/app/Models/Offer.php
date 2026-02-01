@@ -4,13 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Product extends Model
+class Offer extends Model
 {
     protected $fillable = [
-        'name',
-        'description',
-        'price',
-        'image'
+        'date_delivery',
+        'time_delivery',
+        'datetime_limit'
+    ];
+
+    protected $casts = [
+        'date_delivery' => 'date',
     ];
 
     public function productsOffer()
