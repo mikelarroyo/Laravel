@@ -17,11 +17,14 @@ class ProductOffer extends Model
         return $this->belongsTo(Offer::class);
     }
 
-    public function product(){
+    public function product()
+    {
         return $this->belongsTo(Product::class);
     }
 
-    public function productsOrder(){
-        return $this->hasMany(ProductOrder::class);
+    // product_orders.product_id -> product_offers.id
+    public function productsOrder()
+    {
+        return $this->hasMany(ProductOrder::class, 'product_id');
     }
 }
