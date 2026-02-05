@@ -30,8 +30,8 @@ class DatabaseSeeder extends Seeder
             OffersSeeder::class,
             OfferProductSeeder::class,
             UserSeeder::class,
-            OrdersSeeder::class,
-            Orders_itemsSeeder::class,
+            //OrdersSeeder::class,
+            //Orders_itemsSeeder::class,
         ]);
     }
 }

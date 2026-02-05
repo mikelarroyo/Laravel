@@ -16,16 +16,17 @@ class PrietoController extends Controller
     public function mostrar()
     {
         $offers = Offer::with("productsOffer.product")
-            ->whereDate("date_delivery", ">=", now()->toDateString())
+            ->where(function ($q) {
+                $q->whereNull("datetime_limit")
+                    ->orWhere("datetime_limit", ">", now());
+            })
             ->orderBy("date_delivery", "asc")
             ->orderBy("time_delivery", "asc")
             ->get();
 
-
-        $platos = Product::all();
-
-        return view("home", compact("offers", "platos"));
+        return view("home", compact("offers"));
     }
+
 
 
     // LOGIN
@@ -91,11 +92,11 @@ class PrietoController extends Controller
 
     public function ordersShow()
     {
-        // cargamos también productOffer + product para poder pintarlo después
         $orders = Order::with("products.productOffer.product")
-            ->where('user_id', Auth::id())
+            ->where("user_id", auth()->id())
+            ->orderBy("created_at", "desc")
             ->get();
 
-        return view('pedidos', compact('orders'));
+        return view("orders.index", compact("orders"));
     }
 }

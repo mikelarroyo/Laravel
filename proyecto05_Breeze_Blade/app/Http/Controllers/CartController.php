@@ -2,170 +2,199 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Offer;
-use App\Models\Order;
 use App\Models\ProductOffer;
-use App\Models\ProductOrder;
+use Illuminate\Http\Request;
+use App\Models\Order;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+
 
 class cartController extends Controller
 {
-    public function cartShow()
+    private function getCart(Request $request): array
     {
-        $carrito = session("carrito", []);
+        return $request->session()->get("cart", [
+            "offer_id" => null,
+            "items" => []
+        ]);
+    }
 
-        $offerIds = array_keys($carrito);
+    private function saveCart(Request $request, array $cart): void
+    {
+        $request->session()->put("cart", $cart);
+    }
 
-        $productOfferIds = [];
-        foreach ($carrito as $offerId => $items) {
-            $productOfferIds = array_merge($productOfferIds, array_keys($items));
-        }
-        $productOfferIds = array_unique($productOfferIds);
+    public function cartShow(Request $request)
+    {
+        $cart = $this->getCart($request);
 
-        $offersById = Offer::whereIn("id", $offerIds)->get()->keyBy("id");
+        $items = $cart["items"];
+        $productOfferIds = array_keys($items);
 
-        $productsOffersById = ProductOffer::with("product")
+        $productOffers = ProductOffer::with(["product", "offer"])
             ->whereIn("id", $productOfferIds)
             ->get()
             ->keyBy("id");
 
-        // OJO: esta vista aún tienes que crearla en pasos siguientes,
-        // pero así ya dejamos el controlador coherente.
-        return view("carrito", compact("carrito", "offersById", "productsOffersById"));
-    }
-
-    public function cartAdd($productOfferId)
-    {
-        $carrito = session()->get("carrito", []);
-        $productOffer = ProductOffer::findOrFail($productOfferId);
-
-        $offerId = $productOffer->offer_id;
-
-        if (!isset($carrito[$offerId])) {
-            $carrito[$offerId] = [];
-        }
-
-        if (!isset($carrito[$offerId][$productOfferId])) {
-            $carrito[$offerId][$productOfferId] = 0;
-        }
-
-        $carrito[$offerId][$productOfferId]++;
-
-        session()->put("carrito", $carrito);
-
-        return redirect()->route("cartShow");
-    }
-
-    // Aquí “remove” elimina la OFERTA del carrito (por el id que llega en la ruta)
-    public function cartRemove($offerId)
-    {
-        $carrito = session("carrito", []);
-
-        if (isset($carrito[$offerId])) {
-            unset($carrito[$offerId]);
-        }
-
-        session()->put("carrito", $carrito);
-
-        return redirect()->route("cartShow");
-    }
-
-    public function cartClear()
-    {
-        session()->forget("carrito");
-        return redirect()->route("home_prieto");
-    }
-
-    // De momento los dejo coherentes con la estructura nueva:
-    // Si luego quieres “+1 / -1” por línea, en el Paso 5 lo dejamos perfecto.
-    public function cartAddOne($productOfferId)
-    {
-        $carrito = session("carrito", []);
-        $productOffer = ProductOffer::findOrFail($productOfferId);
-        $offerId = $productOffer->offer_id;
-
-        if (isset($carrito[$offerId][$productOfferId])) {
-            $carrito[$offerId][$productOfferId]++;
-        }
-
-        session()->put("carrito", $carrito);
-        return redirect()->route("cartShow");
-    }
-
-    public function cartRemoveOne($productOfferId)
-    {
-        $carrito = session("carrito", []);
-        $productOffer = ProductOffer::findOrFail($productOfferId);
-        $offerId = $productOffer->offer_id;
-
-        if (isset($carrito[$offerId][$productOfferId])) {
-            $carrito[$offerId][$productOfferId]--;
-            if ($carrito[$offerId][$productOfferId] <= 0) {
-                unset($carrito[$offerId][$productOfferId]);
-            }
-            if (empty($carrito[$offerId])) {
-                unset($carrito[$offerId]);
-            }
-        }
-
-        session()->put("carrito", $carrito);
-        return redirect()->route("cartShow");
-    }
-
-    public function cartOrder()
-    {
-        $carrito = session("carrito", []);
-
-        if (empty($carrito)) {
-            return redirect()->route("cartShow");
-        }
-
-        // aplanamos productOfferId => qty
         $lineas = [];
-        foreach ($carrito as $offerId => $items) {
-            foreach ($items as $productOfferId => $qty) {
-                $lineas[$productOfferId] = ($lineas[$productOfferId] ?? 0) + (int)$qty;
+        $total = 0;
+
+        foreach ($items as $poId => $row) {
+            if (!isset($productOffers[$poId])) continue;
+
+            $po = $productOffers[$poId];
+            $qty = (int)$row["qty"];
+            $precio = (float)($po->price ?? $po->product->price ?? 0);
+            $subtotal = $qty * $precio;
+
+            $total += $subtotal;
+
+            $lineas[] = [
+                "po" => $po,
+                "qty" => $qty,
+                "precio" => $precio,
+                "subtotal" => $subtotal,
+            ];
+        }
+
+        // Oferta actual del carrito (si hay)
+        $offer = !empty($lineas) ? $lineas[0]["po"]->offer : null;
+
+        return view("cart.show", compact("lineas", "total", "offer"));
+    }
+
+    public function cartAdd(Request $request, $id)
+    {
+        $po = ProductOffer::with("offer")->findOrFail($id);
+
+        $cart = $this->getCart($request);
+
+        // No mezclar ofertas: si hay otra oferta en el carrito, lo vaciamos
+        if ($cart["offer_id"] !== null && (int)$cart["offer_id"] !== (int)$po->offer_id) {
+            $cart = ["offer_id" => null, "items" => []];
+            $request->session()->flash("info", "Carrito reiniciado: solo puedes pedir productos de una oferta.");
+        }
+
+        $cart["offer_id"] = $po->offer_id;
+
+        if (!isset($cart["items"][$po->id])) {
+            $cart["items"][$po->id] = [
+                "product_offer_id" => $po->id,
+                "qty" => 1,
+            ];
+        } else {
+            $cart["items"][$po->id]["qty"]++;
+        }
+
+        $this->saveCart($request, $cart);
+
+        return redirect()->back();
+    }
+
+    public function cartAddOne(Request $request, $id)
+    {
+        return $this->cartAdd($request, $id);
+    }
+
+    public function cartRemoveOne(Request $request, $id)
+    {
+        $cart = $this->getCart($request);
+
+        if (isset($cart["items"][$id])) {
+            $cart["items"][$id]["qty"]--;
+
+            if ($cart["items"][$id]["qty"] <= 0) {
+                unset($cart["items"][$id]);
             }
         }
 
-        $productOfferIds = array_keys($lineas);
-
-        $productOffers = ProductOffer::with("product")
-            ->whereIn("id", $productOfferIds)
-            ->get()
-            ->keyBy("id");
-
-        $total = 0;
-        foreach ($lineas as $productOfferId => $qty) {
-            $po = $productOffers[$productOfferId] ?? null;
-            if (!$po) continue;
-
-            // si product_offers.price es null, usamos product.price
-            $unit = $po->price ?? $po->product->price ?? 0;
-            $total += ($unit * $qty);
+        if (empty($cart["items"])) {
+            $cart["offer_id"] = null;
         }
 
-        // IMPORTANTE: tu tabla orders NO tiene status, así que NO lo guardamos
+        $this->saveCart($request, $cart);
+
+        return redirect()->route("cartShow");
+    }
+
+    public function cartRemove(Request $request, $id)
+    {
+        $cart = $this->getCart($request);
+
+        if (isset($cart["items"][$id])) {
+            unset($cart["items"][$id]);
+        }
+
+        if (empty($cart["items"])) {
+            $cart["offer_id"] = null;
+        }
+
+        $this->saveCart($request, $cart);
+
+        return redirect()->route("cartShow");
+    }
+
+    public function cartClear(Request $request)
+    {
+        $request->session()->forget("cart");
+        return redirect()->route("cartShow");
+    }
+
+
+public function cartOrder(Request $request)
+{
+    $cart = $this->getCart($request);
+
+    if (empty($cart["items"])) {
+        return redirect()->route("cartShow")->withErrors(["error" => "El carrito está vacío."]);
+    }
+
+    $items = $cart["items"];
+    $productOfferIds = array_keys($items);
+
+    $productOffers = ProductOffer::with("product")
+        ->whereIn("id", $productOfferIds)
+        ->get()
+        ->keyBy("id");
+
+    $total = 0;
+    $rows = [];
+
+    foreach ($items as $poId => $row) {
+        if (!isset($productOffers[$poId])) continue;
+
+        $po = $productOffers[$poId];
+        $qty = (int)($row["qty"] ?? 1);
+
+        $price = (float)($po->price ?? $po->product->price ?? 0);
+        $total += $qty * $price;
+
+        $rows[] = [
+            "product_offer_id" => $po->id,
+            "quantity" => $qty,
+        ];
+    }
+
+    if (empty($rows)) {
+        return redirect()->route("cartShow")->withErrors(["error" => "El carrito no tiene productos válidos."]);
+    }
+
+    $orderId = null;
+
+    DB::transaction(function () use ($total, $rows, &$orderId) {
         $order = Order::create([
-            "user_id" => Auth::id(),
-            "total" => $total
+            "user_id" => auth()->id(),
+            "total" => $total,
         ]);
 
-        foreach ($lineas as $productOfferId => $qty) {
-            // product_orders.product_id guarda el id de product_offers
-            ProductOrder::updateOrCreate(
-                [
-                    "order_id" => $order->id,
-                    "product_id" => $productOfferId,
-                ],
-                [
-                    "quantity" => $qty
-                ]
-            );
-        }
+        $orderId = $order->id;
 
-        session()->forget("carrito");
-        return redirect()->route("home_prieto");
-    }
+        $order->products()->createMany($rows);
+    });
+
+    $request->session()->forget("cart");
+
+    return redirect()->route("ordersShow")->with("info", "Pedido realizado correctamente (ID: $orderId).");
+}
+
 }

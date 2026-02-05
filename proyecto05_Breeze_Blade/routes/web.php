@@ -18,6 +18,10 @@ Route::post('login_prieto', [prietoController::class, 'store'])->name('login_pri
 //REGISTER
 Route::get('register_prieto', [prietoController::class, 'register'])->name('register_prieto');
 Route::post('register_prieto', [prietoController::class, 'storeRegister'])->name('login_prieto');
+Route::get('/home', function () {
+    return redirect()->route('home_prieto');
+})->name('home');
+
 
 
 Route::middleware("auth")->group(function () {
@@ -60,7 +64,7 @@ Route::middleware(["auth", "isAdmin"])
 
 //LARAVEL
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('home_prieto');
 });
 
 Route::get('/dashboard', function () {

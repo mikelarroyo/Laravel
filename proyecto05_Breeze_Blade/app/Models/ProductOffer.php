@@ -6,11 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductOffer extends Model
 {
-    protected $fillable = [
-        'offer_id',
-        'product_id',
-        'price'
-    ];
+    protected $fillable = ["offer_id", "product_id", "price"];
 
     public function offer()
     {
@@ -20,11 +16,5 @@ class ProductOffer extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
-    }
-
-    // product_orders.product_id -> product_offers.id
-    public function productsOrder()
-    {
-        return $this->hasMany(ProductOrder::class, 'product_id');
     }
 }

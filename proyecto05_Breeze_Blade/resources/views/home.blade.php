@@ -5,6 +5,10 @@
 
     <h2 class="mb-3">Prieto Eats</h2>
 
+    @if(session('info'))
+        <div class="alert alert-info">{{ session('info') }}</div>
+    @endif
+
     @if($offers->isEmpty())
         <div class="alert alert-info">
             No hay ofertas disponibles ahora mismo.
@@ -56,9 +60,15 @@
                             @endif
                         </div>
 
-                        <a class="btn btn-outline-primary" href="{{ route('cartShow') }}">
-                            Ver carrito
-                        </a>
+                        @auth
+                            <a class="btn btn-outline-primary" href="{{ route('cartShow') }}">
+                                Ver carrito
+                            </a>
+                        @else
+                            <a class="btn btn-outline-primary" href="{{ route('login') }}">
+                                Inicia sesión
+                            </a>
+                        @endauth
                     </div>
 
                     @if($offer->productsOffer->isEmpty())
@@ -76,7 +86,7 @@
                                 <div class="col-md-4 mb-3">
                                     <div class="card h-100">
                                         @if(!empty($p->image))
-                                            <img src="{{ $p->image }}" class="card-img-top" alt="{{ $p->name }}">
+                                            <img src="{{ asset($p->image) }}" class="card-img-top" alt="{{ $p->name }}">
                                         @endif
 
                                         <div class="card-body d-flex flex-column">
@@ -89,13 +99,19 @@
                                             <div class="mt-auto d-flex justify-content-between align-items-center">
                                                 <strong>{{ number_format($precio, 2) }} €</strong>
 
-                                                {{-- AÑADIR AL CARRITO: por productOffer --}}
-                                                <form action="{{ route('cartAdd', $po->id) }}" method="POST">
-                                                    @csrf
-                                                    <button class="btn btn-success btn-sm">
-                                                        Añadir
-                                                    </button>
-                                                </form>
+                                                @auth
+                                                    {{-- AÑADIR AL CARRITO: por product_offer (id = $po->id) --}}
+                                                    <form action="{{ route('cartAdd', $po->id) }}" method="POST">
+                                                        @csrf
+                                                        <button class="btn btn-success btn-sm">
+                                                            Añadir
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <a class="btn btn-success btn-sm" href="{{ route('login') }}">
+                                                        Entrar para añadir
+                                                    </a>
+                                                @endauth
                                             </div>
                                         </div>
                                     </div>

@@ -14,13 +14,11 @@ class Orders_itemsSeeder extends Seeder
     public function run(): void
     {
         DB::table('product_orders')->insert([
-            "order_id" => 1,
-            "product_id" => 1,
+            'order_id' => 1,
+            'product_offer_id' => 1,
+            'quantity' => 2,
         ]);
 
-        DB::table('product_orders')->insert([
-            "order_id" => 1,
-            "product_id" => 2,
-        ]);
+        
     }
 }
