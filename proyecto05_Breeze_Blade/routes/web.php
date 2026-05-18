@@ -1,23 +1,21 @@
 <?php
 
-use App\Http\Controllers\admin\adminController;
 use App\Http\Controllers\admin\offerController;
+use App\Http\Controllers\admin\ordersController;
 use App\Http\Controllers\admin\productController;
-use App\Http\Controllers\admin\userController;
 use App\Http\Controllers\cartController;
 use App\Http\Controllers\prietoController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use Termwind\Components\Raw;
 
 //HOME PRIETO
 Route::get("/prieto", [prietoController::class, 'mostrar'])->name("home_prieto");
 //LOGIN
 Route::get('/login_prieto', [prietoController::class, 'create'])->name('login_prieto');
-Route::post('login_prieto', [prietoController::class, 'store'])->name('login_prieto');
+Route::post('/login_prieto', [prietoController::class, 'store'])->name('login_prieto.post');
 //REGISTER
-Route::get('register_prieto', [prietoController::class, 'register'])->name('register_prieto');
-Route::post('register_prieto', [prietoController::class, 'storeRegister'])->name('login_prieto');
+Route::get('/register_prieto', [prietoController::class, 'register'])->name('register_prieto');
+Route::post('/register_prieto', [prietoController::class, 'storeRegister'])->name('register_prieto.post');
 Route::get('/home', function () {
     return redirect()->route('home_prieto');
 })->name('home');
@@ -60,6 +58,8 @@ Route::middleware(["auth", "isAdmin"])
         //RUTAS ADMINISTRADOR
         Route::resource("products", productController::class);
         Route::resource("offers", offerController::class);
+        Route::get("orders", [ordersController::class, 'index'])->name("orders.index");
+        Route::get("orders/{id}", [ordersController::class, 'show'])->name("orders.show");
     });
 
 //LARAVEL

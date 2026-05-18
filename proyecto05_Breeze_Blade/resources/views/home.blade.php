@@ -3,10 +3,20 @@
 @section('content')
 <div class="container mt-4">
 
-    <h2 class="mb-3">Prieto Eats</h2>
+    <h2 class="mb-3 text-center">Nuestras ofertas</h2>
+
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
     @if(session('info'))
-        <div class="alert alert-info">{{ session('info') }}</div>
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ session('info') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     @endif
 
     @if($offers->isEmpty())
@@ -15,7 +25,7 @@
         </div>
     @else
 
-        {{-- NAV TABS: una tab por oferta --}}
+        {{-- NAV TABS: una tab por oferta, etiqueta = fecha --}}
         <ul class="nav nav-tabs" id="offersTabs" role="tablist">
             @foreach($offers as $index => $offer)
                 <li class="nav-item" role="presentation">
@@ -23,15 +33,8 @@
                             id="tab-offer-{{ $offer->id }}"
                             data-bs-toggle="tab"
                             data-bs-target="#offer-{{ $offer->id }}"
-                            type="button"
-                            role="tab"
-                            aria-controls="offer-{{ $offer->id }}"
-                            aria-selected="{{ $index === 0 ? 'true' : 'false' }}">
-                        {{ $offer->name }}
-                        <small class="d-block text-muted">
-                            {{ \Carbon\Carbon::parse($offer->date_delivery)->format('d/m') }}
-                            {{ \Carbon\Carbon::parse($offer->time_delivery)->format('H:i') }}
-                        </small>
+                            type="button" role="tab">
+                        {{ $offer->date_delivery->locale('es')->isoFormat('D [de] MMMM') }}
                     </button>
                 </li>
             @endforeach
@@ -42,33 +45,16 @@
             @foreach($offers as $index => $offer)
                 <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}"
                      id="offer-{{ $offer->id }}"
-                     role="tabpanel"
-                     aria-labelledby="tab-offer-{{ $offer->id }}">
+                     role="tabpanel">
 
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <h4 class="mb-1">{{ $offer->name }}</h4>
-                            <div class="text-muted">
-                                Entrega: {{ \Carbon\Carbon::parse($offer->date_delivery)->format('d/m/Y') }}
-                                a las {{ \Carbon\Carbon::parse($offer->time_delivery)->format('H:i') }}
-                            </div>
-
-                            @if($offer->datetime_limit)
-                                <div class="text-danger">
-                                    Límite de pedido: {{ \Carbon\Carbon::parse($offer->datetime_limit)->format('d/m/Y H:i') }}
-                                </div>
-                            @endif
-                        </div>
-
-                        @auth
-                            <a class="btn btn-outline-primary" href="{{ route('cartShow') }}">
-                                Ver carrito
-                            </a>
-                        @else
-                            <a class="btn btn-outline-primary" href="{{ route('login') }}">
-                                Inicia sesión
-                            </a>
-                        @endauth
+                    <div class="mb-3 text-muted small">
+                        Recogida a las {{ $offer->time_delivery }}
+                        @if($offer->datetime_limit)
+                            &nbsp;·&nbsp;
+                            <span class="text-danger">
+                                Límite de pedido: {{ \Carbon\Carbon::parse($offer->datetime_limit)->locale('es')->isoFormat('D [de] MMMM [a las] H:mm') }}
+                            </span>
+                        @endif
                     </div>
 
                     @if($offer->productsOffer->isEmpty())
@@ -86,31 +72,31 @@
                                 <div class="col-md-4 mb-3">
                                     <div class="card h-100">
                                         @if(!empty($p->image))
-                                            <img src="{{ asset($p->image) }}" class="card-img-top" alt="{{ $p->name }}">
+                                            <img src="{{ asset($p->image) }}"
+                                                 class="card-img-top"
+                                                 alt="{{ $p->name }}"
+                                                 style="height:200px; object-fit:cover;">
                                         @endif
 
                                         <div class="card-body d-flex flex-column">
                                             <h5 class="card-title">{{ $p->name }}</h5>
 
                                             @if(!empty($p->description))
-                                                <p class="card-text text-muted">{{ $p->description }}</p>
+                                                <p class="card-text text-muted small">{{ $p->description }}</p>
                                             @endif
 
-                                            <div class="mt-auto d-flex justify-content-between align-items-center">
-                                                <strong>{{ number_format($precio, 2) }} €</strong>
+                                            <div class="mt-auto">
+                                                <p class="fw-bold mb-2">Precio: {{ number_format($precio, 2) }} €</p>
 
                                                 @auth
-                                                    {{-- AÑADIR AL CARRITO: por product_offer (id = $po->id) --}}
                                                     <form action="{{ route('cartAdd', $po->id) }}" method="POST">
                                                         @csrf
-                                                        <button class="btn btn-success btn-sm">
-                                                            Añadir
+                                                        <button type="submit" class="btn btn-success btn-sm">
+                                                            Añadir al carrito
                                                         </button>
                                                     </form>
                                                 @else
-                                                    <a class="btn btn-success btn-sm" href="{{ route('login') }}">
-                                                        Entrar para añadir
-                                                    </a>
+                                                    <p class="text-danger">Inicia sesión para comprar</p>
                                                 @endauth
                                             </div>
                                         </div>

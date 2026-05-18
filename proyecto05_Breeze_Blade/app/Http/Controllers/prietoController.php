@@ -16,9 +16,10 @@ class PrietoController extends Controller
     public function mostrar()
     {
         $offers = Offer::with("productsOffer.product")
+            ->where("date_delivery", ">=", today())
             ->where(function ($q) {
                 $q->whereNull("datetime_limit")
-                    ->orWhere("datetime_limit", ">", now());
+                ->orWhere("datetime_limit", ">", now());
             })
             ->orderBy("date_delivery", "asc")
             ->orderBy("time_delivery", "asc")
@@ -32,7 +33,7 @@ class PrietoController extends Controller
     // LOGIN
     public function create()
     {
-        return view('login');
+        return view('auth.login');
     }
 
     public function store(LoginRequest $request)
@@ -45,7 +46,7 @@ class PrietoController extends Controller
     // REGISTER
     public function register()
     {
-        return view('register');
+        return view('auth.register');
     }
 
     public function storeRegister(Request $request)

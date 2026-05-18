@@ -31,7 +31,7 @@
         }
         .btn-outline-prieto:hover {
             background-color: #2eab4f;
-            color: white;A
+            color: white;
         }
         body {
             background-color: #f8f9fa; /* Gris clarito de fondo */

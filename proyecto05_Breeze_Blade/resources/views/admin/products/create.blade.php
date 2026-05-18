@@ -1,61 +1,55 @@
 @extends('layouts.plantilla')
 
 @section('content')
-<div class="container mt-4">
+<div class="container mt-4" style="max-width: 600px;">
 
-    <h2>Alta de Oferta</h2>
+    <h2 class="mb-4">Alta de Producto</h2>
 
-    <form action="{{ route('admin.offers.store') }}" method="POST">
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
+
+    <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <div class="mb-3">
-            <label>Fecha recogida</label>
-            <input type="date" class="form-control" name="date_delivery" required>
+            <label class="form-label fw-bold">Nombre</label>
+            <input type="text" class="form-control @error('name') is-invalid @enderror"
+                   name="name" value="{{ old('name') }}" required>
+            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
-            <label>Hora recogida</label>
-            <input type="time" class="form-control" name="time_delivery" required>
+            <label class="form-label fw-bold">Descripción</label>
+            <textarea class="form-control @error('description') is-invalid @enderror"
+                      name="description" rows="3">{{ old('description') }}</textarea>
+            @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
         <div class="mb-3">
-            <label>Fecha y hora límite</label>
-            <input type="datetime-local" class="form-control" name="datetime_limit">
+            <label class="form-label fw-bold">Precio (€)</label>
+            <input type="number" step="0.01" min="0"
+                   class="form-control @error('price') is-invalid @enderror"
+                   name="price" value="{{ old('price') }}" required>
+            @error('price') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
-        <h4>Listado de productos</h4>
+        <div class="mb-4">
+            <label class="form-label fw-bold">Imagen</label>
+            <input type="file" class="form-control @error('image') is-invalid @enderror"
+                   name="image" accept="image/*">
+            @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+        </div>
 
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Selecciona</th>
-                    <th>Nombre</th>
-                    <th>Precio base</th>
-                    <th>Precio oferta</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($productos as $p)
-                <tr>
-                    <td>
-                        <input type="checkbox" name="dish_selected[]" value="{{ $p->id }}">
-                    </td>
-                    <td>{{ $p->name }}</td>
-                    <td>{{ $p->price }} €</td>
-                    <td>
-                        <input type="number" step="0.01"
-                               class="form-control form-control-sm"
-                               name="dish_price[{{ $p->id }}]">
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <button class="btn btn-success">Guardar oferta</button>
-        <a href="{{ route('admin.offers.index') }}" class="btn btn-secondary">
-            Volver
-        </a>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">Guardar producto</button>
+            <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Volver</a>
+        </div>
     </form>
+
 </div>
 @endsection

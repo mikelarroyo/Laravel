@@ -16,7 +16,6 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    // líneas del pedido
     public function products()
     {
         return $this->hasMany(ProductOrder::class, 'order_id');

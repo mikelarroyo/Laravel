@@ -27,7 +27,7 @@
                         <td>{{ $o->id }}</td>
                         <td>{{ $o->date_delivery }}</td>
                         <td>{{ $o->time_delivery }}</td>
-                        <td>{{ $o->productsOffer->count() }}</td>
+                        <td>{{ $o->products_offer_count }}</td>
                         <td>
                             <form action="{{ route('admin.offers.destroy', $o->id) }}" method="POST">
                                 @csrf

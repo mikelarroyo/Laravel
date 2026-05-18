@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Prieto Eats</title>
@@ -72,7 +73,7 @@
             background-color: #28a745;
             min-width: 220px;
             border-radius: 6px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
             padding: 8px 0;
             z-index: 999;
         }
@@ -97,12 +98,12 @@
         }
 
         .dropdown-item:hover {
-            background-color: rgba(255,255,255,0.15);
+            background-color: rgba(255, 255, 255, 0.15);
         }
 
         .dropdown-divider {
             height: 1px;
-            background-color: rgba(255,255,255,0.3);
+            background-color: rgba(255, 255, 255, 0.3);
             margin: 6px 0;
         }
 
@@ -120,29 +121,41 @@
 
 <body>
 
-<nav class="navbar">
-    {{-- LOGO --}}
-    <div class="logo-container">
-        <img src="{{ asset('img/logo.png') }}" alt="Prieto Eats" class="logo-img">
-        <span>Prieto Eats</span>
-    </div>
+    <nav class="navbar">
+        {{-- LOGO --}}
+        <div class="logo-container">
+            <img src="{{ asset('img/logo.png') }}" alt="Prieto Eats" class="logo-img">
+            <span>Prieto Eats</span>
+        </div>
 
-    {{-- LINKS --}}
-    <div class="nav-links">
+        {{-- LINKS --}}
+        <div class="nav-links">
 
-        {{-- 🔁 VOLVER A HOME --}}
-        <a href="{{ route('home_prieto') }}" class="nav-item">
-            <i class="fas fa-house"></i> Inicio
-        </a>
+            {{-- VOLVER A HOME --}}
+            <a href="{{ route('home_prieto') }}" class="nav-item">
+                <i class="fas fa-house"></i> Inicio
+            </a>
 
-        @auth
+            @auth
+            
+            @php
+                $carritoNav = session('cart', []);
+                $totalItems = 0;
+                foreach ($carritoNav as $articulos) {
+                    $totalItems += array_sum($articulos);
+                }
+            @endphp
             <a href="{{ route('cartShow') }}" class="nav-item">
                 <i class="fas fa-shopping-cart"></i> Carrito
+                @if($totalItems > 0)
+                    ({{ $totalItems }})
+                @endif
             </a>
+
 
             {{-- USUARIO --}}
             <div class="dropdown">
-                <div class="nav-item dropdown-toggle">
+                <div class="nav-item">
                     <i class="fas fa-user"></i>
                     {{ Auth::user()->name }}
                     <i class="fas fa-caret-down"></i>
@@ -154,20 +167,33 @@
                     </a>
 
                     @if(Auth::user()->is_admin)
-                        <div class="dropdown-divider"></div>
+                    <div class="dropdown-divider"></div>
 
-                        <a href="{{ route('admin.products.index') }}" class="dropdown-item">
-                            <i class="fas fa-box"></i> Productos
-                        </a>
+                    <a href="{{ route('admin.products.index') }}" class="dropdown-item">
+                        <i class="fas fa-box"></i> Productos
+                    </a>
 
-                        <a href="{{ route('admin.offers.index') }}" class="dropdown-item">
-                            <i class="fas fa-tags"></i> Ofertas
-                        </a>
+                    <a href="{{ route('admin.offers.index') }}" class="dropdown-item">
+                        <i class="fas fa-tags"></i> Ofertas
+                    </a>
+
+                    <a href="{{ route('admin.orders.index') }}" class="dropdown-item">
+                        <i class="fas fa-list-alt"></i> Pedidos
+                    </a>
+                    {{--@php
+                    $cartCount =
+                    array_sum(array_column(session('cart', ['items' => []])['items'], 'qty')); @endphp--}}
+                    {{--<a href="{{ route('cartShow') }}" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> Carrito
+                    @if($cartCount > 0)
+                    ({{ $cartCount }})
+                    @endif
+                    </a>--}}
                     @endif
 
                     <div class="dropdown-divider"></div>
 
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout_prieto') }}">
                         @csrf
                         <button type="submit" class="dropdown-item btn-link">
                             <i class="fas fa-sign-out-alt"></i> Cerrar sesión
@@ -175,17 +201,19 @@
                     </form>
                 </div>
             </div>
-        @else
-            <a href="{{ route('login') }}" class="nav-item">
+            @else
+            <a href="{{ route('login_prieto') }}" class="nav-item">
                 <i class="fas fa-sign-in-alt"></i> Login
             </a>
 
-            <a href="{{ route('register') }}" class="nav-item">
+            <a href="{{ route('register_prieto') }}" class="nav-item">
                 <i class="fas fa-user-plus"></i> Registrarse
             </a>
-        @endauth
-    </div>
-</nav>
+
+            @endauth
+        </div>
+    </nav>
 
 </body>
+
 </html>

@@ -17,4 +17,9 @@ class ProductOffer extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function productsOrder()
+    {
+        return $this->hasMany(ProductOrder::class);
+    }
 }
